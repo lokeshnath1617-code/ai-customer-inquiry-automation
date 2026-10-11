@@ -1,0 +1,453 @@
+{
+  "name": "Portfolio Copy",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "db0677a2-130f-4a0e-a7fc-e66a890e2605",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "6aca60a8-5e5d-4d1c-832b-f2e5b02795c7",
+      "name": "Webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1a7c6a38-89f6-44a9-b1e4-73ba54f91d64",
+              "name": "name",
+              "value": "={{$json.body.name}}",
+              "type": "string"
+            },
+            {
+              "id": "096307a4-df45-4ef0-9032-64538aa696d5",
+              "name": "email",
+              "value": "={{$json.body.email}}",
+              "type": "string"
+            },
+            {
+              "id": "b87ecf60-43ee-4684-9287-39cf6257786c",
+              "name": "message",
+              "value": "={{$json.body.message}}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "d9d1c4aa-5883-4255-81b8-27bbb41f1958",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "llama3.2:latest",
+          "mode": "list",
+          "cachedResultName": "llama3.2:latest"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Classify this customer inquiry.\n\nBased only on the customer's message, decide whether they are genuinely interested in the service.\n\nReply with ONLY one of these two words:\nINTERESTED\nNOT_INTERESTED\n\nCustomer message:\n{{$json.message}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.ollama",
+      "typeVersion": 1,
+      "position": [
+        672,
+        0
+      ],
+      "id": "183a3cec-e3c8-4dc6-a658-fa59b8623bfd",
+      "name": "Message a model"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c0e9a1f1-d2d0-4e33-88e7-e863a904ae92",
+              "leftValue": "={{$json.content}}",
+              "rightValue": "INTERESTED",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "bbd57705-0763-47bf-ad31-6169e417749e",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "llama3.2:latest",
+          "mode": "list",
+          "cachedResultName": "llama3.2:latest"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Write a short, professional reply to this interested customer.\n\nCustomer name: {{$node[\"Edit Fields\"].json.name}}\nCustomer message: {{$node[\"Edit Fields\"].json.message}}\n\nThe reply should:\n- Address the customer by name\n- Acknowledge their inquiry\n- Show that we can help\n- Encourage the next step\n- Be concise and professional\n- Sign exactly as \"Lokesh\"\n- Do not use placeholders"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.ollama",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        -96
+      ],
+      "id": "b9c03423-be2f-4dbe-b417-77da1f2805d9",
+      "name": "Message a model1"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "llama3.2:latest",
+          "mode": "list",
+          "cachedResultName": "llama3.2:latest"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Write a short, professional reply to this customer.\n\nCustomer name: {{$node[\"Edit Fields\"].json.name}}\nCustomer message: {{$node[\"Edit Fields\"].json.message}}\n\nThe customer is not currently interested.\n\nThe reply should:\n- Address the customer by name\n- Be polite and professional\n- Respect their decision\n- Do not pressure them\n- Sign exactly as \"Lokesh\"\n- Do not use placeholders"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.ollama",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        96
+      ],
+      "id": "78b06419-243f-49fa-b217-68b1d9f3f888",
+      "name": "Message a model2"
+    },
+    {
+      "parameters": {
+        "sendTo": "recipient@example.com",
+        "subject": "Interested Customer Inquiry",
+        "message": "={{$json.content}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1632,
+        -96
+      ],
+      "id": "25888c45-317c-4516-bbef-4d716c10e4ab",
+      "name": "Send a message",
+      "webhookId": "4a1643b7-f870-44cc-b3f6-d09497eb3a71"
+    },
+    {
+      "parameters": {
+        "sendTo": "recipient@example.com",
+        "subject": "Customer Not Interested",
+        "message": "={{$json.content}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1632,
+        96
+      ],
+      "id": "bd551a3a-838e-4e71-a8ec-08e51d081d5d",
+      "name": "Send a message1",
+      "webhookId": "edd229cd-694c-4175-b300-bac6e0797e05"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1904,
+        16
+      ],
+      "id": "229836ef-82f3-4f33-9687-0105b90f971d",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bf5d4e75-c239-41f7-966c-ee660a74e18d",
+              "name": "final_status",
+              "value": "Automation completed successfully.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2128,
+        16
+      ],
+      "id": "5ae543da-eed6-4bb4-9f19-81c763f13554",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a8902e40-ecea-4c9d-9db8-001c387ee94a",
+              "leftValue": "={{$json.name}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "2badb013-a377-4d8e-9db8-454899c43d28",
+              "leftValue": "={{$json.email}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "885473a3-2322-49c4-b600-1587a83476e2",
+              "leftValue": "={{$json.message}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        0
+      ],
+      "id": "57014db5-00c2-4e02-9f56-dad5310da4d9",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8cf719ed-b3d1-4334-b698-774e996df2eb",
+              "name": "validation_status",
+              "value": "Invalid inquiry: customer name, email, or message is missing.",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        720,
+        144
+      ],
+      "id": "0bc4fe9d-57a1-482c-a636-6b352cca139d",
+      "name": "Edit Fields2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Message a model2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model2": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6d91c082-ffbb-4820-a7cd-38f09c99ae12",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "3FOEl6ZQ6wgYb2kM",
+  "tags": []
+}
