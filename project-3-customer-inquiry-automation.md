@@ -54,3 +54,11 @@ Built and tested as a local demonstration project.
 - Store inquiry results in a database or spreadsheet.
 - Add stronger email validation and duplicate-inquiry handling.
 - Test additional edge cases before client deployment.
+
+## Workflow Template
+
+The sanitized n8n workflow JSON is available here:
+
+[Download the n8n workflow template](./project-3-portfolio-safe.json)
+
+**Setup note:** Before running the workflow, import the JSON into n8n, configure your own Ollama and Gmail credentials, and review the nodes and connections. The template does not include credentials or guarantee that every environment is configured identically.
