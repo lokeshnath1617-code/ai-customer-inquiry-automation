@@ -1,0 +1,239 @@
+{
+  "name": "Lead Capture and Follow-up Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "project-5-lead-capture",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "64d6efbc-58ae-476d-9844-c9d72e3c0177",
+      "name": "Webhook",
+      "webhookId": "ac243458-55fd-4c0c-bfbc-9c3bb7e2cba3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2937090c-4f43-435f-8862-ab84038115f5",
+              "name": "name",
+              "value": "={{ $json.body.name }}",
+              "type": "string"
+            },
+            {
+              "id": "5673b0a2-81e5-46d0-8f7f-4135a23ad203",
+              "name": "email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "c6011d55-fdaa-4ef3-8a8c-1b83faf42b3f",
+              "name": "interest",
+              "value": "={{ $json.body.interest }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "088e7219-195d-4d3b-9c0d-09c0d7d8cbc3",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c0f4a0f3-d79e-40cf-818b-547147281478",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "6ee909c4-50ed-4058-95bb-7dce9f7e454c",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        0
+      ],
+      "id": "f306a1ee-91d1-4839-a925-e41b659849cc",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fe3a4762-12f7-4bc6-8524-cd3ed18a0a62",
+              "name": "follow_up_message",
+              "value": "={{ 'Hi ' + $json.name + ', thank you for your interest in ' + $json.interest + '! We received your inquiry and will follow up with you soon.' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        672,
+        -96
+      ],
+      "id": "faaefe18-34fc-4e05-b2ff-fc643f95764c",
+      "name": "Prepare Follow-up"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "Thanks for your inquiry",
+        "emailType": "text",
+        "message": "={{ $json.follow_up_message }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        -96
+      ],
+      "id": "10f4f4b6-1dc3-43c3-b1be-373ad86deea5",
+      "name": "Send a message",
+      "webhookId": "85ecb881-a755-42a9-abb2-68d6bcbe24fb",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9PuRsK2vpMRvtYrm",
+          "name": "Gmail account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d2364ae3-2449-4ee9-8354-7884878fc39d",
+              "name": "status",
+              "value": "Invalid lead — name or email is missing",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        672,
+        96
+      ],
+      "id": "251bfddf-0736-4231-821b-466f13b3546e",
+      "name": "Invalid Lead"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Prepare Follow-up",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Invalid Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Follow-up": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "02913daa-9383-46e6-b2fa-7dda55902cd5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9f560d053411b8d32f5d5f29d8c54c5a45cc1232cf91bdbadab5a13bf057bea0"
+  },
+  "nodeGroups": [],
+  "id": "MdP98IMYWmXfdqm9",
+  "tags": []
+}
