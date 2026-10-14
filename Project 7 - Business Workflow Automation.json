@@ -1,0 +1,213 @@
+{
+  "name": "Project 7 - Business Workflow Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "project-7-business-workflow",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "aabcea25-2a44-4612-a3f6-6d146dd4c160",
+      "name": "Webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e4df571e-39fb-4a41-bc67-bed7b745f79a",
+              "name": "customer_name",
+              "value": "={{ $json.body.customer_name }}",
+              "type": "string"
+            },
+            {
+              "id": "73ea9285-3f7b-4a5d-ac3e-90d5bbaa59e0",
+              "name": "customer_email",
+              "value": "={{ $json.body.customer_email }}",
+              "type": "string"
+            },
+            {
+              "id": "48239e3e-c765-4887-954f-ede19070e0b3",
+              "name": "service_requested",
+              "value": "={{ $json.body.service_requested }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "ba5d458f-7e68-433f-803c-609287e18ca0",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e79ff432-9e69-4a6d-9a38-715d37f17e00",
+              "leftValue": "={{ $json.customer_name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "8ff774e3-ae7d-4b2a-b5e6-310ff1c6f7dd",
+              "leftValue": "={{ $json.customer_email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        0
+      ],
+      "id": "41471b6d-b454-41d3-8d9a-ddf32691707d",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "97376a7b-6c26-4a73-b06e-1319d15cae34",
+              "name": "status",
+              "value": "Valid inquiry — ready for processing",
+              "type": "string"
+            },
+            {
+              "id": "cb539d18-2dda-4a6c-806c-a59e4fa14f2b",
+              "name": "inquiry_summary",
+              "value": "={{ 'Customer: ' + $json.customer_name + ' | Email: ' + $json.customer_email + ' | Service: ' + $json.service_requested }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        672,
+        -96
+      ],
+      "id": "cd0cd6b4-9d24-4cf6-ba98-b11122af302e",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1916aab-1e43-4451-a1dd-39fa8e520599",
+              "name": "status",
+              "value": "Invalid inquiry — customer name or email is missing",
+              "type": "string"
+            },
+            {
+              "id": "1478fbd9-6031-4245-a21a-5b3d62d8290c",
+              "name": "action required",
+              "value": "Request the missing customer details",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        672,
+        96
+      ],
+      "id": "94cde771-9bce-476c-b387-3cf884ed40fd",
+      "name": "Edit Fields2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "555ca5bb-265e-44a0-bd8b-04d9f0975956",
+  "nodeGroups": [],
+  "id": "T4wM01UlrExY3V2J",
+  "tags": []
+}
